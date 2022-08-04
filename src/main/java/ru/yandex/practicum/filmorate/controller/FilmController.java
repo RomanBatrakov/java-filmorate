@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controllers;
+package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +28,7 @@ public class FilmController {
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
-        if (filmValidation(film)) {
+        if (film!= null && filmValidation(film)) {
             addNewId(film);
             films.put(film.getId(), film);
             log.debug("Сохранен фильм: {}", film);
@@ -41,7 +41,7 @@ public class FilmController {
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        if (filmValidation(film) && films.containsKey(film.getId())) {
+        if (film!= null && filmValidation(film) && films.containsKey(film.getId())) {
             films.put(film.getId(), film);
             log.debug("Обновлен фильм: {}", film);
             return film;
@@ -51,7 +51,7 @@ public class FilmController {
         }
     }
 
-    boolean filmValidation(Film film) {
+    public boolean filmValidation(Film film) {
         LocalDate cinemaBirthday = LocalDate.of(1895, 12, 28);
         return !film.getReleaseDate().isBefore(cinemaBirthday);
     }

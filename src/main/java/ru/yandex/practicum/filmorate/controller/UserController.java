@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.controllers;
+package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +27,7 @@ public class UserController {
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        if (userValidation(user)) {
+        if (user != null && userValidation(user)) {
             addNewId(user);
             if (user.getName().isBlank())
                 user.setName(user.getLogin());
@@ -42,7 +42,7 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        if (userValidation(user) && users.containsKey(user.getId())) {
+        if (user != null && userValidation(user) && users.containsKey(user.getId())) {
             users.put(user.getId(), user);
             log.debug("Пользователь фильм: {}", user);
             return user;
@@ -52,7 +52,7 @@ public class UserController {
         }
     }
 
-    boolean userValidation(User user) {
+    public boolean userValidation(User user) {
         return !user.getLogin().contains(" ");
     }
 
