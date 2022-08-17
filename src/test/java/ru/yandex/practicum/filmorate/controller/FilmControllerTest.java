@@ -4,6 +4,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
     Film film = new Film();
-    FilmController controller = new FilmController();
+    InMemoryFilmStorage controller = new InMemoryFilmStorage();
 
     @BeforeEach
     void createFilm() {
