@@ -41,6 +41,7 @@ public class UserService implements UserStorage {
             throw new ValidationException("Ошибка удаления друга, проверьте корректность данных.");
         }
     }
+
     public List<User> getUserFriends(String id) {
         List<User> userFriends = new ArrayList<>();
         if (idValidation(id)) {
@@ -55,6 +56,23 @@ public class UserService implements UserStorage {
         }
     }
 
+    public List<User> getCommonFriendList(String id, String friendId) {
+        List<User> commonFriendList = new ArrayList<>();
+        if (idValidation(id) && idValidation(friendId)) {
+            User user1 = userStorage.getUsers().get(Long.parseLong(id));
+            User user2 = userStorage.getUsers().get(Long.parseLong(friendId));
+            for (Long friendsId : user2.getFriends()) {
+                if (user1.getFriends().contains(friendsId)) {
+                    commonFriendList.add(userStorage.getUsers().get(friendsId));
+                }
+            }
+            return commonFriendList;
+        } else {
+            log.warn("Ошибка при получении списка общих друзей.");
+            throw new ValidationException("Ошибка списка общих друзей, проверьте корректность данных.");
+        }
+    }
+
     @Override
     public List<User> listUsers() {
         return userStorage.listUsers();
@@ -65,7 +83,7 @@ public class UserService implements UserStorage {
         if (idValidation(id)) {
             return userStorage.getUser(id);
         } else {
-            log.warn("Ошибка апроса пользователя.");
+            log.warn("Ошибка запроса пользователя.");
             throw new ValidationException("Ошибка запроса пользователя, проверьте корректность данных.");
         }
     }
@@ -79,12 +97,8 @@ public class UserService implements UserStorage {
     public User updateUser(User user) {
         return userStorage.updateUser(user);
     }
-//TODO: end here
-    public List<User> getCommonFriendList(String id, String friendId) {
-        return null;
-    }
 
-    private boolean idValidation (String id) {
+    private boolean idValidation(String id) {
         return id != null && userStorage.getUsers().containsKey(Long.parseLong(id));
     }
 }

@@ -58,7 +58,15 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     public boolean userValidation(User user) {
-        return !user.getLogin().contains(" ");
+        boolean userFriends = true;
+        for (Long usersId : user.getFriends()) {
+            if (!users.containsKey(usersId)) {
+                userFriends = false;
+                break;
+            }
+        }
+        return !user.getLogin().contains(" ")
+                && userFriends;
     }
 
     private void addNewId(User user) {

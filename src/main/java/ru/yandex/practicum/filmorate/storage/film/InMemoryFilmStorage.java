@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -12,15 +13,22 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@Data
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    private int generatorId = 0;
-    private final Map<Integer, Film> films = new HashMap<>();
+    private long generatorId = 0;
+    private final Map<Long, Film> films = new HashMap<>();
 
     @Override
-    public List<Film> getFilms() {
+    public List<Film> listFilms() {
         log.debug("Текущее количество фильмов: {}", films.size());
         return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public Film getFilm(Long id) {
+        log.debug("Текущий фильм {}", films.get(id));
+        return films.get(id);
     }
 
     @Override
@@ -54,7 +62,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     private void addNewId(Film film) {
-        int id = generatorId + 1;
+        long id = generatorId + 1;
         while (films.containsKey(id)) {
             id += id;
         }
