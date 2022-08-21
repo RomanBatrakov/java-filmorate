@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -11,15 +12,22 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@Data
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    private int generatorId = 0;
-    private final Map<Integer, User> users = new HashMap<>();
+    private long generatorId = 0;
+    private final Map<Long, User> users = new HashMap<>();
 
     @Override
     public List<User> listUsers() {
         log.debug("Текущее количество пользователей: {}", users.size());
         return new ArrayList<>(users.values());
+    }
+
+    @Override
+    public User getUser(String id) {
+        log.debug("Текущий пользователь {}", users.get(Long.parseLong(id)));
+        return users.get(Long.parseLong(id));
     }
 
     @Override
@@ -41,7 +49,7 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User user) {
         if (user != null && userValidation(user) && users.containsKey(user.getId())) {
             users.put(user.getId(), user);
-            log.debug("Пользователь фильм: {}", user);
+            log.debug("Обновлен пользователь: {}", user);
             return user;
         } else {
             log.warn("Ошибка при обновлении пользователя: {}", user);
@@ -54,7 +62,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     private void addNewId(User user) {
-        int id = generatorId + 1;
+        long id = generatorId + 1;
         while (users.containsKey(id)) {
             id += id;
         }

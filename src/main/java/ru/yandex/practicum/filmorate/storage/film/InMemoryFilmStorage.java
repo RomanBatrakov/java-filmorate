@@ -18,7 +18,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
 
     @Override
-    public List<Film> listFilms() {
+    public List<Film> getFilms() {
         log.debug("Текущее количество фильмов: {}", films.size());
         return new ArrayList<>(films.values());
     }
