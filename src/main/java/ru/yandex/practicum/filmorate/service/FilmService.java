@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -8,8 +9,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 
-
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,12 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService implements FilmStorage {
 
-    InMemoryFilmStorage filmStorage = new InMemoryFilmStorage();
+    private final InMemoryFilmStorage filmStorage;
+
+    @Autowired
+    public FilmService(InMemoryFilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
+    }
 
     public void addLike(Long id, Long userId) {
         if (idValidation(id) && userId > 0) {
@@ -44,19 +48,12 @@ public class FilmService implements FilmStorage {
     public List<Film> getMostPopularFilms(int count) {
         if (count > 0) {
             return filmStorage.getFilms().values().stream()
-                    .sorted(new FilmsComparator())
+                    .sorted((o1, o2) -> Integer.compare(o2.getLikes().size(), o1.getLikes().size()))
                     .limit(count)
                     .collect(Collectors.toList());
         } else {
             log.warn("Ошибка запроса списка популярных фильмов.");
             throw new ValidationException("Ошибка запроса списка популярных фильмов, проверьте корректность данных.");
-        }
-    }
-
-    static class FilmsComparator implements Comparator<Film> {
-        @Override
-        public int compare(Film o1, Film o2) {
-            return Integer.compare(o2.getLikes().size(), o1.getLikes().size());
         }
     }
 
