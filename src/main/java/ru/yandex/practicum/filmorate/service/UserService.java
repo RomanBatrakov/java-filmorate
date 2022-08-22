@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
@@ -12,12 +12,12 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.ArrayList;
 import java.util.List;
 
-@Value
 @Slf4j
+@AllArgsConstructor
 @Service
 public class UserService implements UserStorage {
 
-    InMemoryUserStorage userStorage;
+    private InMemoryUserStorage userStorage;
 
     public void addFriend(Long id, Long friendId) {
         if (idValidation(id) && idValidation(friendId)) {

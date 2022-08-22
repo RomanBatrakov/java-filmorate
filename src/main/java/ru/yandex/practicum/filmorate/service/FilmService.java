@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
@@ -8,19 +8,21 @@ import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Value
 @Slf4j
+@AllArgsConstructor
 @Service
 public class FilmService implements FilmStorage {
 
-    InMemoryFilmStorage filmStorage;
+    private InMemoryFilmStorage filmStorage;
+    private InMemoryUserStorage userStorage;
 
     public void addLike(Long id, Long userId) {
-        if (idValidation(id) && userId > 0) {
+        if (idValidation(id) && userId > 0 && userStorage.getUsers().containsKey(userId)) {
             Film film = filmStorage.getFilms().get(id);
             film.getLikes().add(userId);
             log.debug("Фильму {} поставили лайк.", film);
