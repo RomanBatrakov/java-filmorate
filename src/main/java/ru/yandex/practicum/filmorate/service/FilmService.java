@@ -2,10 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+
 
 import java.util.Comparator;
 import java.util.List;
@@ -35,7 +37,7 @@ public class FilmService implements FilmStorage {
             log.debug("Фильму {} удалили лайк.", film);
         } else {
             log.warn("Ошибка при удалении лайка фильму.");
-            throw new ValidationException("Ошибка удаления лайка, проверьте корректность данных.");
+            throw new NotFoundException("Ошибка удаления лайка, проверьте корректность данных.");
         }
     }
 
@@ -69,7 +71,7 @@ public class FilmService implements FilmStorage {
             return filmStorage.getFilm(id);
         } else {
             log.warn("Ошибка запроса фильма.");
-            throw new ValidationException("Ошибка запроса фильма, проверьте корректность данных.");
+            throw new NotFoundException("Ошибка запроса фильма, проверьте корректность данных.");
         }
     }
 

@@ -3,8 +3,10 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,9 +27,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(String id) {
-        log.debug("Текущий пользователь {}", users.get(Long.parseLong(id)));
-        return users.get(Long.parseLong(id));
+    public User getUser(Long id) {
+        log.debug("Текущий пользователь {}", users.get(id));
+        return users.get(id);
     }
 
     @Override
@@ -53,7 +55,7 @@ public class InMemoryUserStorage implements UserStorage {
             return user;
         } else {
             log.warn("Ошибка при обновлении пользователя: {}", user);
-            throw new ValidationException("Ошибка обновления пользователя, проверьте корректность данных.");
+            throw new NotFoundException("Ошибка обновления пользователя, проверьте корректность данных.");
         }
     }
 

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
@@ -16,25 +17,25 @@ public class UserService implements UserStorage {
 
     InMemoryUserStorage userStorage = new InMemoryUserStorage();
 
-    public void addFriend(String id, String friendId) {
+    public void addFriend(Long id, Long friendId) {
         if (idValidation(id) && idValidation(friendId)) {
-            User user1 = userStorage.getUsers().get(Long.parseLong(id));
-            User user2 = userStorage.getUsers().get(Long.parseLong(friendId));
-            user1.getFriends().add(Long.parseLong(friendId));
-            user2.getFriends().add(Long.parseLong(id));
+            User user1 = userStorage.getUsers().get(id);
+            User user2 = userStorage.getUsers().get(friendId);
+            user1.getFriends().add(friendId);
+            user2.getFriends().add(id);
             log.debug("Теперь {} и {} друзья.", user1, user2);
         } else {
             log.warn("Ошибка при добавлении друга.");
-            throw new ValidationException("Ошибка добавления друга, проверьте корректность данных.");
+            throw new NotFoundException("Ошибка добавления друга, проверьте корректность данных.");
         }
     }
 
-    public void deleteFriend(String id, String friendId) {
+    public void deleteFriend(Long id, Long friendId) {
         if (idValidation(id) && idValidation(friendId)) {
-            User user1 = userStorage.getUsers().get(Long.parseLong(id));
-            User user2 = userStorage.getUsers().get(Long.parseLong(friendId));
-            user1.getFriends().remove(Long.parseLong(friendId));
-            user2.getFriends().remove(Long.parseLong(id));
+            User user1 = userStorage.getUsers().get(id);
+            User user2 = userStorage.getUsers().get(friendId);
+            user1.getFriends().remove(friendId);
+            user2.getFriends().remove(id);
             log.debug("Теперь {} и {} друзья.", user1, user2);
         } else {
             log.warn("Ошибка при удалении друга.");
@@ -42,10 +43,10 @@ public class UserService implements UserStorage {
         }
     }
 
-    public List<User> getUserFriends(String id) {
+    public List<User> getUserFriends(Long id) {
         List<User> userFriends = new ArrayList<>();
         if (idValidation(id)) {
-            User user = userStorage.getUsers().get(Long.parseLong(id));
+            User user = userStorage.getUsers().get(id);
             for (Long friendId : user.getFriends()) {
                 userFriends.add(userStorage.getUsers().get(friendId));
             }
@@ -56,11 +57,11 @@ public class UserService implements UserStorage {
         }
     }
 
-    public List<User> getCommonFriendList(String id, String friendId) {
+    public List<User> getCommonFriendList(Long id, Long friendId) {
         List<User> commonFriendList = new ArrayList<>();
         if (idValidation(id) && idValidation(friendId)) {
-            User user1 = userStorage.getUsers().get(Long.parseLong(id));
-            User user2 = userStorage.getUsers().get(Long.parseLong(friendId));
+            User user1 = userStorage.getUsers().get(id);
+            User user2 = userStorage.getUsers().get(friendId);
             for (Long friendsId : user2.getFriends()) {
                 if (user1.getFriends().contains(friendsId)) {
                     commonFriendList.add(userStorage.getUsers().get(friendsId));
@@ -79,12 +80,12 @@ public class UserService implements UserStorage {
     }
 
     @Override
-    public User getUser(String id) {
+    public User getUser(Long id) {
         if (idValidation(id)) {
             return userStorage.getUser(id);
         } else {
             log.warn("Ошибка запроса пользователя.");
-            throw new ValidationException("Ошибка запроса пользователя, проверьте корректность данных.");
+            throw new NotFoundException("Ошибка запроса пользователя, проверьте корректность данных.");
         }
     }
 
@@ -98,7 +99,7 @@ public class UserService implements UserStorage {
         return userStorage.updateUser(user);
     }
 
-    private boolean idValidation(String id) {
-        return id != null && userStorage.getUsers().containsKey(Long.parseLong(id));
+    private boolean idValidation(Long id) {
+        return id != null && userStorage.getUsers().containsKey(id);
     }
 }
