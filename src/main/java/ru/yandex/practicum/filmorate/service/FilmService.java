@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -12,16 +12,12 @@ import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Value
 @Slf4j
 @Service
 public class FilmService implements FilmStorage {
 
-    private final InMemoryFilmStorage filmStorage;
-
-    @Autowired
-    public FilmService(InMemoryFilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
-    }
+    InMemoryFilmStorage filmStorage;
 
     public void addLike(Long id, Long userId) {
         if (idValidation(id) && userId > 0) {
