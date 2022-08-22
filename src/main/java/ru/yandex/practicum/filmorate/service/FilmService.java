@@ -7,10 +7,10 @@ import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService implements FilmStorage {
 
-    private InMemoryFilmStorage filmStorage;
+    private FilmStorage filmStorage;
     private InMemoryUserStorage userStorage;
 
     public void addLike(Long id, Long userId) {
@@ -78,6 +78,11 @@ public class FilmService implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         return filmStorage.updateFilm(film);
+    }
+
+    @Override
+    public Map<Long, Film> getFilms() {
+        return filmStorage.getFilms();
     }
 
     private boolean idValidation(Long id) {

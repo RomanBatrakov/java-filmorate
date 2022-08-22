@@ -6,18 +6,18 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @AllArgsConstructor
 @Service
 public class UserService implements UserStorage {
 
-    private InMemoryUserStorage userStorage;
+    private UserStorage userStorage;
 
     public void addFriend(Long id, Long friendId) {
         if (idValidation(id) && idValidation(friendId)) {
@@ -99,6 +99,11 @@ public class UserService implements UserStorage {
     @Override
     public User updateUser(User user) {
         return userStorage.updateUser(user);
+    }
+
+    @Override
+    public Map<Long, User> getUsers() {
+        return userStorage.getUsers();
     }
 
     private boolean idValidation(Long id) {
