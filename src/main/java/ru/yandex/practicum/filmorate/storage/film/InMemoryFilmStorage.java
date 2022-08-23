@@ -18,6 +18,8 @@ import java.util.Map;
 @Data
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
+
+    private long filmsIdCount = 0;
     private final Map<Long, Film> films = new HashMap<>();
 
     @Override
@@ -33,8 +35,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film createFilm(Film film) {
+    public Film createFilm(@NonNull Film film) {
         if (filmValidation(film)) {
+            addNewId(film);
             films.put(film.getId(), film);
             log.debug("Сохранен фильм: {}", film);
             return film;
@@ -60,5 +63,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     public boolean filmValidation(Film film) {
         LocalDate cinemaBirthday = LocalDate.of(1895, 12, 28);
         return !film.getReleaseDate().isBefore(cinemaBirthday);
+    }
+
+    private void addNewId(Film film) {
+        long id = filmsIdCount + 1;
+        while (films.containsKey(id)) {
+            id += id;
+        }
+        film.setId(id);
+        filmsIdCount = id;
     }
 }

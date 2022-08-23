@@ -17,7 +17,7 @@ import java.util.Map;
 @Data
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    private long generatorId = 0;
+    private long usersIdCount = 0;
     private final Map<Long, User> users = new HashMap<>();
 
     @Override
@@ -73,11 +73,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     private void addNewId(User user) {
-        long id = generatorId + 1;
+        long id = usersIdCount + 1;
         while (users.containsKey(id)) {
             id += id;
         }
         user.setId(id);
-        generatorId = id;
+        usersIdCount = id;
     }
 }
