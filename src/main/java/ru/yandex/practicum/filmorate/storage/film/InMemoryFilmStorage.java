@@ -18,7 +18,6 @@ import java.util.Map;
 @Data
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    private long generatorId = 0;
     private final Map<Long, Film> films = new HashMap<>();
 
     @Override
@@ -65,11 +64,10 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     private void addNewId(Film film) {
-        long id = generatorId + 1;
+        long id = 1;
         while (films.containsKey(id)) {
             id += id;
         }
         film.setId(id);
-        generatorId = id;
     }
 }
