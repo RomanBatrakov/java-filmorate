@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import java.util.List;
 import java.util.Map;
@@ -20,10 +19,10 @@ import java.util.stream.Collectors;
 public class FilmService implements FilmStorage {
 
     private FilmStorage filmStorage;
-    private InMemoryUserStorage userStorage;
+    private UserService userService;
 
     public void addLike(Long id, Long userId) {
-        if (idValidation(id) && userId > 0 && userStorage.getUsers().containsKey(userId)) {
+        if (idValidation(id) && userId > 0 && userService.getUsers().containsKey(userId)) {
             Film film = filmStorage.getFilms().get(id);
             film.getLikes().add(userId);
             log.debug("Фильму {} поставили лайк.", film);
