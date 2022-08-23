@@ -72,7 +72,8 @@ public class FilmService implements FilmStorage {
     }
 
     @Override
-    public Film createFilm(Film film) {
+    public Film createFilm(@NonNull Film film) {
+        addNewId(film);
         return filmStorage.createFilm(film);
     }
 
@@ -88,5 +89,13 @@ public class FilmService implements FilmStorage {
 
     private boolean idValidation(@NonNull Long id) {
         return filmStorage.getFilms().containsKey(id);
+    }
+
+    private void addNewId(Film film) {
+        long id = 1;
+        while (filmStorage.getFilms().containsKey(id)) {
+            id += id;
+        }
+        film.setId(id);
     }
 }
