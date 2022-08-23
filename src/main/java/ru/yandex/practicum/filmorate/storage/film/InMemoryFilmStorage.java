@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
@@ -33,8 +34,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film createFilm(Film film) {
-        if (film != null && filmValidation(film)) {
+    public Film createFilm(@NonNull Film film) {
+        if (filmValidation(film)) {
             addNewId(film);
             films.put(film.getId(), film);
             log.debug("Сохранен фильм: {}", film);
@@ -46,8 +47,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Film updateFilm(Film film) {
-        if (film != null && filmValidation(film) && films.containsKey(film.getId())) {
+    public Film updateFilm(@NonNull Film film) {
+        if (filmValidation(film) && films.containsKey(film.getId())) {
             film.setLikes(films.get(film.getId()).getLikes());
             films.put(film.getId(), film);
             log.debug("Обновлен фильм: {}", film);

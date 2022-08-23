@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
@@ -106,7 +107,7 @@ public class UserService implements UserStorage {
         return userStorage.getUsers();
     }
 
-    private boolean idValidation(Long id) {
-        return id != null && userStorage.getUsers().containsKey(id);
+    private boolean idValidation(@NonNull Long id) {
+        return userStorage.getUsers().containsKey(id);
     }
 }
