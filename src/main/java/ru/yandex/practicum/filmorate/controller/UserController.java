@@ -1,67 +1,57 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.Value;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exeptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@Slf4j
+@Value
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    private int generatorId = 0;
-    private final Map<Integer, User> users = new HashMap<>();
+    UserService userService;
 
     @GetMapping
     public List<User> listUsers() {
-        log.debug("Текущее количество пользователей: {}", users.size());
-        return new ArrayList<>(users.values());
+        return userService.listUsers();
+    }
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable Long id) {
+        return userService.getUser(id);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getUserFriends(@PathVariable Long id) {
+        return userService.getUserFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriendList(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.getCommonFriendList(id, otherId);
     }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        if (user != null && userValidation(user)) {
-            addNewId(user);
-            if (user.getName().isBlank())
-                user.setName(user.getLogin());
-            users.put(user.getId(), user);
-            log.debug("Сохранен пользователь: {}", user);
-            return user;
-        } else {
-            log.warn("Ошибка при создании пользователя: {}", user);
-            throw new ValidationException("Ошибка создания пользователя, проверьте корректность данных.");
-        }
+        return userService.createUser(user);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.addFriend(id, friendId);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        if (user != null && userValidation(user) && users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-            log.debug("Пользователь фильм: {}", user);
-            return user;
-        } else {
-            log.warn("Ошибка при обновлении пользователя: {}", user);
-            throw new ValidationException("Ошибка обновления пользователя, проверьте корректность данных.");
-        }
+        return userService.updateUser(user);
     }
 
-    public boolean userValidation(User user) {
-        return !user.getLogin().contains(" ");
-    }
-
-    private void addNewId(User user) {
-        int id = generatorId + 1;
-        while (users.containsKey(id)) {
-            id += id;
-        }
-        user.setId(id);
-        generatorId = id;
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.deleteFriend(id, friendId);
     }
 }

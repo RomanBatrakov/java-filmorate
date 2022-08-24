@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -15,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
     User user = new User();
-    UserController controller = new UserController();
+    InMemoryUserStorage controller = new InMemoryUserStorage();
 
     @BeforeEach
     void createUser() {
