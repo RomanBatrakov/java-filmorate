@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -14,14 +16,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-@AllArgsConstructor
 @Service
 public class FilmService implements FilmStorage {
+    private final FilmStorage filmStorage;
+    private final UserService userService;
 
-    private FilmStorage filmStorage;
-    private UserService userService;
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, UserService userService) {
+        this.filmStorage = filmStorage;
+        this.userService = userService;
+    }
 
-    public void addLike(Long id, Long userId) {
+
+    public void addLike(int id, Long userId) {
         if (idValidation(id) && userId > 0 && userService.getUsers().containsKey(userId)) {
             Film film = filmStorage.getFilms().get(id);
             film.getLikes().add(userId);
@@ -32,7 +38,7 @@ public class FilmService implements FilmStorage {
         }
     }
 
-    public void deleteLike(Long id, Long userId) {
+    public void deleteLike(int id, Long userId) {
         if (idValidation(id) && userId > 0) {
             Film film = filmStorage.getFilms().get(id);
             film.getLikes().remove(userId);
@@ -60,10 +66,12 @@ public class FilmService implements FilmStorage {
         return filmStorage.listFilms();
     }
 
+    //здесь изменил код
     @Override
-    public Film getFilm(Long id) {
-        if (idValidation(id)) {
-            return filmStorage.getFilm(id);
+    public Film getFilmById(int id) {
+//        if (idValidation(id)) {
+        if (id > 0) {
+            return filmStorage.getFilmById(id);
         } else {
             log.warn("Ошибка запроса фильма.");
             throw new NotFoundException("Ошибка запроса фильма, проверьте корректность данных.");
@@ -81,11 +89,11 @@ public class FilmService implements FilmStorage {
     }
 
     @Override
-    public Map<Long, Film> getFilms() {
+    public Map<Integer, Film> getFilms() {
         return filmStorage.getFilms();
     }
 
-    private boolean idValidation(@NonNull Long id) {
+    private boolean idValidation(@NonNull int id) {
         return filmStorage.getFilms().containsKey(id);
     }
 }

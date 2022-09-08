@@ -8,11 +8,11 @@ import java.util.Map;
 public interface FilmStorage {
     List<Film> listFilms();
 
-    Film getFilm(Long id);
+    Film getFilmById(int id);
 
     Film createFilm(Film film);
 
     Film updateFilm(Film film);
 
-    Map<Long, Film> getFilms();
+    Map<Integer, Film> getFilms();
 }
