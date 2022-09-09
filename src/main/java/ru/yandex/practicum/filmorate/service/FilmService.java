@@ -30,7 +30,7 @@ public class FilmService implements FilmStorage {
     public void addLike(int id, Long userId) {
         if (idValidation(id) && userId > 0 && userService.getUsers().containsKey(userId)) {
             Film film = filmStorage.getFilms().get(id);
-            film.getLikes().add(userId);
+//            film.getLikes().add(userId);
             log.debug("Фильму {} поставили лайк.", film);
         } else {
             log.warn("Ошибка при добавлении лайка фильму.");
@@ -41,7 +41,7 @@ public class FilmService implements FilmStorage {
     public void deleteLike(int id, Long userId) {
         if (idValidation(id) && userId > 0) {
             Film film = filmStorage.getFilms().get(id);
-            film.getLikes().remove(userId);
+//            film.getLikes().remove(userId);
             log.debug("Фильму {} удалили лайк.", film);
         } else {
             log.warn("Ошибка при удалении лайка фильму.");
@@ -52,7 +52,7 @@ public class FilmService implements FilmStorage {
     public List<Film> getMostPopularFilms(int count) {
         if (count > 0) {
             return filmStorage.getFilms().values().stream()
-                    .sorted((o1, o2) -> Integer.compare(o2.getLikes().size(), o1.getLikes().size()))
+//                    .sorted((o1, o2) -> Integer.compare(o2.getLikes().size(), o1.getLikes().size()))
                     .limit(count)
                     .collect(Collectors.toList());
         } else {
