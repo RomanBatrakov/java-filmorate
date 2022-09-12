@@ -4,7 +4,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FilmControllerTest {
     Film film = new Film();
-    InMemoryFilmStorage controller = new InMemoryFilmStorage();
+    FilmService filmService;
 
     @BeforeEach
     void createFilm() {
@@ -31,7 +31,7 @@ class FilmControllerTest {
     @Test
     public void shouldReturnFalseWhenIncorrectReleaseDate() {
         film.setReleaseDate(LocalDate.of(1000, 1, 1));
-        boolean value = controller.filmValidation(film);
+        boolean value = filmService.filmValidation(film);
         assertFalse(value, "Некорректный releaseDate.");
     }
 

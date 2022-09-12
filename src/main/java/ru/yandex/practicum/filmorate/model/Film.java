@@ -30,6 +30,5 @@ public class Film {
     private MpaRating mpa;
     @NotNull
     private List<Genre> genres = new ArrayList<>();
-//    @NotNull
-//    private List<Integer> likes = new ArrayList<>();
+
 }

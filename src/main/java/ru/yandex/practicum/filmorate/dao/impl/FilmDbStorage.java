@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.film;
+package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 
@@ -15,7 +16,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Data
@@ -58,12 +58,30 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        return null;
+        String sqlQuery = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, " +
+                "rating_id = ? WHERE film_id = ?";
+        jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(),
+                Date.valueOf(film.getReleaseDate()), film.getDuration(), film.getMpa().getId(), film.getId());
+        return film;
     }
 
     @Override
-    public Map<Integer, Film> getFilms() {
-        return null;
+    public void addLike(int id, int userId) {
+        String sqlQuery = "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
+        jdbcTemplate.update(sqlQuery, id, userId);
+    }
+
+    @Override
+    public void deleteLike(int id, int userId) {
+        String sqlQuery = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
+        jdbcTemplate.update(sqlQuery, id, userId);
+    }
+
+    @Override
+    public List<Film> getMostPopularFilms(int count) {
+        String sqlQuery = "SELECT * FROM films f LEFT JOIN (SELECT film_id, COUNT(*) likes_count" +
+                " FROM likes GROUP BY film_id) l ON f.film_id = l.film_id ORDER BY l.likes_count DESC LIMIT ?";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
@@ -74,8 +92,9 @@ public class FilmDbStorage implements FilmStorage {
         film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
         film.setDuration(resultSet.getInt("duration"));
         int mpaRating = (resultSet.getInt("rating_id"));
-        MpaRating mpa = jdbcTemplate.queryForObject("SELECT * FROM rating WHERE id = " + mpaRating, new BeanPropertyRowMapper<>(MpaRating.class));
+        MpaRating mpa = jdbcTemplate.queryForObject("SELECT * FROM rating WHERE id = ?", new BeanPropertyRowMapper<>(MpaRating.class), mpaRating);
         film.setMpa(mpa);
         return film;
     }
+
 }
