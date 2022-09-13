@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @Value
 @RestController
@@ -25,15 +26,15 @@ public class UserController {
         return userService.getUserById(id);
     }
 
-//    @GetMapping("/{id}/friends")
-//    public List<User> getUserFriends(@PathVariable int id) {
-//        return userService.getUserFriends(id);
-//    }
+    @GetMapping("/{id}/friends")
+    public List<User> getUserFriends(@PathVariable int id) {
+        return userService.getUserFriends(id);
+    }
 
-//    @GetMapping("/{id}/friends/common/{otherId}")
-//    public List<User> getCommonFriendList(@PathVariable int id, @PathVariable int otherId) {
-//        return userService.getCommonFriendList(id, otherId);
-//    }
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriendList(@PathVariable int id, @PathVariable int otherId) {
+        return userService.getCommonFriendList(id, otherId);
+    }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {

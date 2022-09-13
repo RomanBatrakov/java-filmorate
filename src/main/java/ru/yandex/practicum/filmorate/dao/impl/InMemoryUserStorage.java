@@ -38,24 +38,15 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User createUser(@NonNull User user) {
-        if (userValidation(user)) {
-            addNewId(user);
-            if (user.getName().isBlank())
-                user.setName(user.getLogin());
-            users.put(user.getId(), user);
-            log.debug("Сохранен пользователь: {}", user);
-            return user;
-        } else {
-            log.warn("Ошибка при создании пользователя: {}", user);
-            throw new ValidationException("Ошибка создания пользователя, проверьте корректность данных.");
-        }
+        addNewId(user);
+        users.put(user.getId(), user);
+        return user;
     }
 
     @Override
     public User updateUser(@NonNull User user) {
-        if (userValidation(user) && users.containsKey(user.getId())) {
+        if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
-            log.debug("Обновлен пользователь: {}", user);
             return user;
         } else {
             log.warn("Ошибка при обновлении пользователя: {}", user);
@@ -97,7 +88,7 @@ public class InMemoryUserStorage implements UserStorage {
             User user = users.get(id);
             friends.get(user);
             List<Integer> friendsId = new ArrayList<>(friends.get(user));
-            for (Integer userId: friendsId) {
+            for (Integer userId : friendsId) {
                 userFriends.add(users.get(userId));
             }
             return userFriends;
@@ -123,10 +114,6 @@ public class InMemoryUserStorage implements UserStorage {
             log.warn("Ошибка при получении списка общих друзей.");
             throw new ValidationException("Ошибка списка общих друзей, проверьте корректность данных.");
         }
-    }
-
-    public boolean userValidation(User user) {
-        return !user.getLogin().contains(" ");
     }
 
     private void addNewId(User user) {

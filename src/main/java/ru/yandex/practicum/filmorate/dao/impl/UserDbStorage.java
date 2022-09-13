@@ -2,11 +2,13 @@ package ru.yandex.practicum.filmorate.dao.impl;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
+import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.Date;
@@ -19,6 +21,7 @@ import java.util.List;
 @Data
 @Component
 public class UserDbStorage implements UserStorage {
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -29,8 +32,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(int id) {
-        String sqlQuery = "SELECT * FROM users WHERE user_id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
+        try {
+            String sqlQuery = "SELECT * FROM users WHERE user_id = ?";
+            return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
+        } catch (EmptyResultDataAccessException e){
+            throw new NotFoundException("Ошибка запроса пользователя, проверьте корректность данных.");
+        }
     }
 
     @Override
@@ -63,8 +70,12 @@ public class UserDbStorage implements UserStorage {
      */
     @Override
     public void addFriend(int id, int friendId) {
-        String sqlQuery = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
-        jdbcTemplate.update(sqlQuery, id, friendId);
+        try {
+            String sqlQuery = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
+            jdbcTemplate.update(sqlQuery, id, friendId);
+        } catch (Exception e) {
+            throw new NotFoundException("Ошибка запроса, проверьте корректность данных.");
+        }
     }
 
     @Override
@@ -77,29 +88,28 @@ public class UserDbStorage implements UserStorage {
     public List<User> getUserFriends(int id) {
         String sqlQuery = "SELECT * FROM users u JOIN (SELECT friend_id" +
                 " FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
+        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id);
     }
 
-    /**
-     * Наподумать
-     * @param id
-     * @param friendId
-     * @return
-     */
     @Override
     public List<User> getCommonFriendList(int id, int friendId) {
-        String sqlQuery = "SELECT * FROM users u JOIN (SELECT friend_id" +
-                " FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
+        String sqlQuery = "SELECT * FROM users u" +
+        " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) f ON u.user_id = f.friend_id" +
+        " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id, friendId);
     }
 
-    private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
-        User user = new User();
-        user.setId(resultSet.getInt("user_id"));
-        user.setEmail(resultSet.getString("email"));
-        user.setLogin(resultSet.getString("login"));
-        user.setName(resultSet.getString("name"));
-        user.setBirthday(resultSet.getDate("birthday").toLocalDate());
-        return user;
+    private User mapRowToUser(ResultSet resultSet, int rowNum){
+        try {
+            User user = new User();
+            user.setId(resultSet.getInt("user_id"));
+            user.setEmail(resultSet.getString("email"));
+            user.setLogin(resultSet.getString("login"));
+            user.setName(resultSet.getString("name"));
+            user.setBirthday(resultSet.getDate("birthday").toLocalDate());
+            return user;
+        } catch (EmptyResultDataAccessException | SQLException e){
+            throw new NotFoundException("Ошибка запроса, проверьте корректность данных.");
+        }
     }
 }

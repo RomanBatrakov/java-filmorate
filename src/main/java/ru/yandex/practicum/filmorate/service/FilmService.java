@@ -24,21 +24,11 @@ public class FilmService implements FilmStorage {
 
 
     public void addLike(int id, int userId) {
-        try {
-            filmStorage.addLike(id, userId);
-        } catch (ValidationException e) {
-            log.warn("Ошибка при добавлении лайка фильму.");
-            throw new NotFoundException("Ошибка добавления лайка, проверьте корректность данных.");
-        }
+        filmStorage.addLike(id, userId);
     }
 
     public void deleteLike(int id, int userId) {
-        try {
-            filmStorage.deleteLike(id, userId);
-        } catch (NotFoundException e) {
-            log.warn("Ошибка при удалении лайка фильму.");
-            throw new NotFoundException("Ошибка удаления лайка, проверьте корректность данных.");
-        }
+        filmStorage.deleteLike(id, userId);
     }
 
     public List<Film> getMostPopularFilms(int count) {
@@ -79,7 +69,7 @@ public class FilmService implements FilmStorage {
 
     @Override
     public Film updateFilm(@NonNull Film film) {
-        if (filmValidation(film)) {
+        if (getFilmById(film.getId()).getId() == film.getId() && filmValidation(film)) {
             filmStorage.updateFilm(film);
             log.debug("Обновлен фильм: {}", film);
             return film;
@@ -91,6 +81,6 @@ public class FilmService implements FilmStorage {
 
     public boolean filmValidation(@NonNull Film film) {
         LocalDate cinemaBirthday = LocalDate.of(1895, 12, 28);
-        return !film.getReleaseDate().isBefore(cinemaBirthday) && film.getId() > 0;
+        return !film.getReleaseDate().isBefore(cinemaBirthday);
     }
 }

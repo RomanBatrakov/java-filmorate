@@ -22,9 +22,9 @@ public class UserService implements UserStorage {
     }
 
     public void addFriend(int id, int friendId) {
-        if(id != friendId) {
+        if (id != friendId) {
             userStorage.addFriend(id, friendId);
-        } else{
+        } else {
             log.warn("Ошибка при добавлении друга.");
             throw new NotFoundException("Ошибка добавления друга, проверьте корректность данных.");
         }
@@ -42,19 +42,14 @@ public class UserService implements UserStorage {
     public List<User> getUserFriends(int id) {
         try {
             return userStorage.getUserFriends(id);
-        } catch (ValidationException e){
+        } catch (ValidationException e) {
             log.warn("Ошибка при получении списка друзей.");
             throw new ValidationException("Ошибка списка друзей, проверьте корректность данных.");
         }
     }
-
+@Override
     public List<User> getCommonFriendList(int id, int friendId) {
-        try {
-            return userStorage.getCommonFriendList(id, friendId);
-        } catch (ValidationException e){
-            log.warn("Ошибка при получении списка общих друзей.");
-            throw new ValidationException("Ошибка списка общих друзей, проверьте корректность данных.");
-        }
+        return userStorage.getCommonFriendList(id, friendId);
     }
 
     @Override
@@ -62,25 +57,38 @@ public class UserService implements UserStorage {
         return userStorage.listUsers();
     }
 
-
     @Override
     public User getUserById(int id) {
-        try {
-            return userStorage.getUserById(id);
-        } catch (NotFoundException e){
-            log.warn("Ошибка запроса пользователя.");
-            throw new NotFoundException("Ошибка запроса пользователя, проверьте корректность данных.");
-        }
+        return userStorage.getUserById(id);
     }
 
     @Override
     public User createUser(@NonNull User user) {
-        return userStorage.createUser(user);
+        if (userValidation(user)) {
+            if (user.getName().isBlank())
+                user.setName(user.getLogin());
+            log.debug("Сохранен пользователь: {}", user);
+            return userStorage.createUser(user);
+        } else {
+            log.warn("Ошибка при создании пользователя: {}", user);
+            throw new ValidationException("Ошибка создания пользователя, проверьте корректность данных.");
+        }
     }
 
     @Override
     public User updateUser(@NonNull User user) {
-        return userStorage.updateUser(user);
+        if (getUserById(user.getId()).getId() == user.getId() && userValidation(user)) {
+            log.debug("Обновлен пользователь: {}", user);
+            return userStorage.updateUser(user);
+        } else {
+            log.warn("Ошибка при обновлении пользователя.");
+            throw new NotFoundException("Ошибка обновления пользователя, проверьте корректность данных.");
+        }
     }
 
+    public boolean userValidation(User user) {
+        return !user.getLogin().contains(" ");
+    }
 }
+
+

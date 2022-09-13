@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS film_genres (
         REFERENCES films,
     id INTEGER NOT NULL
         REFERENCES genres,
-    PRIMARY KEY (film_id, id)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS likes (

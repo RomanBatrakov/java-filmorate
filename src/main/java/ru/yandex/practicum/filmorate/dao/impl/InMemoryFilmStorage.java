@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final UserService userService;
+    private final InMemoryUserStorage inMemoryUserStorage;
     private int filmsIdCount = 0;
     private final Map<Integer, Film> films = new HashMap<>();
     private Map<Integer, List<Integer>> likes = new HashMap<>();
@@ -58,7 +57,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void addLike(int id, int userId) {
-        if (idValidation(id) && userId > 0 && userService.getUsers().containsKey(userId)) {
+        if (idValidation(id) && userId > 0 && inMemoryUserStorage.getUsers().containsKey(userId)) {
             Film film = films.get(id);
             List<Integer> filmLikes = likes.get(id);
             filmLikes.add(userId);
@@ -72,7 +71,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void deleteLike(int id, int userId) {
-        if (idValidation(id) && userId > 0) {
+        if (idValidation(id) && likes.get(id).contains(userId)) {
             Film film = films.get(id);
             likes.get(id).remove((Integer) userId);
             log.debug("Фильму {} удалили лайк.", film);

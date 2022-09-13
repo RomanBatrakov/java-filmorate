@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dao.impl.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
     User user = new User();
-    InMemoryUserStorage controller = new InMemoryUserStorage();
+    UserService userService;
 
     @BeforeEach
     void createUser() {
@@ -30,7 +31,7 @@ class UserControllerTest {
     @Test
     public void shouldReturnFalseWhenIncorrectLogin() {
         user.setLogin("user user");
-        boolean value = controller.userValidation(user);
+        boolean value = userService.userValidation(user);
         assertFalse(value, "Некорректный login - есть пробелы.");
     }
 
