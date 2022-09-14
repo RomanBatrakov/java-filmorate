@@ -23,27 +23,36 @@ import java.util.List;
 @Component
 public class UserDbStorage implements UserStorage {
 
+    private static final String GET_ALL_USERS = "SELECT * FROM users";
+    private static final String GET_USER_BY_ID = "SELECT * FROM users WHERE user_id = ?";
+    private static final String CREATE_USER = "INSERT INTO users (email, login, name, birthday) " +
+            "VALUES (?, ?, ?, ?)";
+    private static final String UPDATE_USER = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE user_id = ?";
+    private static final String ADD_FRIEND = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
+    private static final String DELETE_FRIEND = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
+    private static final String GET_USER_FRIENDS = "SELECT * FROM users u JOIN (SELECT friend_id" +
+            " FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
+    private static final String GET_COMMON_FRIENDLIST = "SELECT * FROM users u" +
+            " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) f ON u.user_id = f.friend_id" +
+            " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     public List<User> listUsers() {
-        String sqlQuery = "SELECT * FROM users";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser);
+        return jdbcTemplate.query(GET_ALL_USERS, this::mapRowToUser);
     }
 
     @Override
     public User getUserById(int id) {
-        String sqlQuery = "SELECT * FROM users WHERE user_id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
+        return jdbcTemplate.queryForObject(GET_USER_BY_ID, this::mapRowToUser, id);
     }
 
     @Override
     public User createUser(User user) {
-        String sqlQuery = "INSERT INTO users (email, login, name, birthday) " +
-                "VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"user_id"});
+            PreparedStatement stmt = connection.prepareStatement(CREATE_USER, new String[]{"user_id"});
             stmt.setString(1, user.getEmail());
             stmt.setString(2, user.getLogin());
             stmt.setString(3, user.getName());
@@ -60,8 +69,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        String sqlQuery = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE user_id = ?";
-        jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(),
+        jdbcTemplate.update(UPDATE_USER, user.getEmail(), user.getLogin(),
                 user.getName(), Date.valueOf(user.getBirthday()), user.getId());
         return user;
     }
@@ -69,8 +77,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void addFriend(int id, int friendId) {
         try {
-            String sqlQuery = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
-            jdbcTemplate.update(sqlQuery, id, friendId);
+            jdbcTemplate.update(ADD_FRIEND, id, friendId);
         } catch (Exception e) {
             throw new NotFoundException("Ошибка запроса, проверьте корректность данных.");
         }
@@ -78,23 +85,17 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteFriend(int id, int friendId) {
-        String sqlQuery = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
-        jdbcTemplate.update(sqlQuery, id, friendId);
+        jdbcTemplate.update(DELETE_FRIEND, id, friendId);
     }
 
     @Override
     public List<User> getUserFriends(int id) {
-        String sqlQuery = "SELECT * FROM users u JOIN (SELECT friend_id" +
-                " FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id);
+        return jdbcTemplate.query(GET_USER_FRIENDS, this::mapRowToUser, id);
     }
 
     @Override
     public List<User> getCommonFriendList(int id, int friendId) {
-        String sqlQuery = "SELECT * FROM users u" +
-                " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) f ON u.user_id = f.friend_id" +
-                " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id, friendId);
+        return jdbcTemplate.query(GET_COMMON_FRIENDLIST, this::mapRowToUser, id, friendId);
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) {

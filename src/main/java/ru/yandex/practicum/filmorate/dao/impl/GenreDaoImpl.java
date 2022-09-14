@@ -15,17 +15,18 @@ import java.util.List;
 @Component
 public class GenreDaoImpl implements GenreDao {
 
+    private static final String GET_GENRES = "SELECT * FROM genres";
+    private static final String GET_GENRE_BY_ID = "SELECT * FROM genres WHERE id = ?";
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Genre> getGenres() {
-        String sqlQuery = "SELECT * FROM genres";
-        return jdbcTemplate.query(sqlQuery, new BeanPropertyRowMapper<>(Genre.class));
+        return jdbcTemplate.query(GET_GENRES, new BeanPropertyRowMapper<>(Genre.class));
     }
 
     @Override
     public Genre getGenreById(int id) {
-        String sqlQuery = "SELECT * FROM genres WHERE id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, new BeanPropertyRowMapper<>(Genre.class), id);
+        return jdbcTemplate.queryForObject(GET_GENRE_BY_ID, new BeanPropertyRowMapper<>(Genre.class), id);
     }
 }

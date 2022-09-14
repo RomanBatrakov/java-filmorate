@@ -15,17 +15,18 @@ import java.util.List;
 @Component
 public class MpaRatingDaoImpl implements MpaRatingDao {
 
+    private static final String GET_RATINGS = "SELECT * FROM rating";
+    private static final String GET_RATING_BY_ID = "SELECT * FROM rating WHERE id = ?";
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     public List<MpaRating> getMpaRatings() {
-        String sqlQuery = "SELECT * FROM rating";
-        return jdbcTemplate.query(sqlQuery, new BeanPropertyRowMapper<>(MpaRating.class));
+        return jdbcTemplate.query(GET_RATINGS, new BeanPropertyRowMapper<>(MpaRating.class));
     }
 
     @Override
     public MpaRating getMpaRatingById(int id) {
-        String sqlQuery = "SELECT * FROM rating WHERE id = ?";
-        return jdbcTemplate.queryForObject(sqlQuery, new BeanPropertyRowMapper<>(MpaRating.class), id);
+        return jdbcTemplate.queryForObject(GET_RATING_BY_ID, new BeanPropertyRowMapper<>(MpaRating.class), id);
     }
 }
