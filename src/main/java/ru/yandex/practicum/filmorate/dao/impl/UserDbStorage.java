@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.ValidationException;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,12 +33,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUserById(int id) {
-        try {
-            String sqlQuery = "SELECT * FROM users WHERE user_id = ?";
-            return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
-        } catch (EmptyResultDataAccessException e){
-            throw new NotFoundException("Ошибка запроса пользователя, проверьте корректность данных.");
-        }
+        String sqlQuery = "SELECT * FROM users WHERE user_id = ?";
+        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToUser, id);
     }
 
     @Override
@@ -53,7 +50,11 @@ public class UserDbStorage implements UserStorage {
             stmt.setDate(4, Date.valueOf(user.getBirthday()));
             return stmt;
         }, keyHolder);
-        user.setId((Integer) keyHolder.getKey());
+        if (keyHolder.getKey() != null) {
+            user.setId((Integer) keyHolder.getKey());
+        } else {
+            throw new ValidationException("Ошибка генерации id в базе.");
+        }
         return user;
     }
 
@@ -65,9 +66,6 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-    /**
-     * Тут возможно потребуется поменять местами @param id и@param friendId.
-     */
     @Override
     public void addFriend(int id, int friendId) {
         try {
@@ -94,12 +92,12 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getCommonFriendList(int id, int friendId) {
         String sqlQuery = "SELECT * FROM users u" +
-        " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) f ON u.user_id = f.friend_id" +
-        " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
+                " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) f ON u.user_id = f.friend_id" +
+                " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser, id, friendId);
     }
 
-    private User mapRowToUser(ResultSet resultSet, int rowNum){
+    private User mapRowToUser(ResultSet resultSet, int rowNum) {
         try {
             User user = new User();
             user.setId(resultSet.getInt("user_id"));
@@ -108,7 +106,7 @@ public class UserDbStorage implements UserStorage {
             user.setName(resultSet.getString("name"));
             user.setBirthday(resultSet.getDate("birthday").toLocalDate());
             return user;
-        } catch (EmptyResultDataAccessException | SQLException e){
+        } catch (EmptyResultDataAccessException | SQLException e) {
             throw new NotFoundException("Ошибка запроса, проверьте корректность данных.");
         }
     }

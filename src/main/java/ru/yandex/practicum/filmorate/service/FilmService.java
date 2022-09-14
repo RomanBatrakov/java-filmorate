@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -22,7 +23,6 @@ public class FilmService implements FilmStorage {
         this.filmStorage = filmStorage;
     }
 
-
     public void addLike(int id, int userId) {
         filmStorage.addLike(id, userId);
     }
@@ -32,9 +32,9 @@ public class FilmService implements FilmStorage {
     }
 
     public List<Film> getMostPopularFilms(int count) {
-        try {
+        if (count > 0) {
             return filmStorage.getMostPopularFilms(count);
-        } catch (NotFoundException e) {
+        } else {
             log.warn("Ошибка запроса списка популярных фильмов.");
             throw new ValidationException("Ошибка запроса списка популярных фильмов, проверьте корректность данных.");
         }
@@ -49,7 +49,7 @@ public class FilmService implements FilmStorage {
     public Film getFilmById(int id) {
         try {
             return filmStorage.getFilmById(id);
-        } catch (NotFoundException e) {
+        } catch (EmptyResultDataAccessException e) {
             log.warn("Ошибка запроса фильма.");
             throw new NotFoundException("Ошибка запроса фильма, проверьте корректность данных.");
         }

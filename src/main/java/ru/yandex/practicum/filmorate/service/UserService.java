@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -15,7 +16,7 @@ import java.util.List;
 @Service
 public class UserService implements UserStorage {
 
-    UserStorage userStorage;
+    private final UserStorage userStorage;
 
     public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
@@ -47,7 +48,8 @@ public class UserService implements UserStorage {
             throw new ValidationException("Ошибка списка друзей, проверьте корректность данных.");
         }
     }
-@Override
+
+    @Override
     public List<User> getCommonFriendList(int id, int friendId) {
         return userStorage.getCommonFriendList(id, friendId);
     }
@@ -59,7 +61,11 @@ public class UserService implements UserStorage {
 
     @Override
     public User getUserById(int id) {
-        return userStorage.getUserById(id);
+        try {
+            return userStorage.getUserById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Ошибка запроса пользователя, проверьте корректность данных.");
+        }
     }
 
     @Override

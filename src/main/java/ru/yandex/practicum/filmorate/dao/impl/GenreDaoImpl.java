@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.dao.GenreDao;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
+
 @Slf4j
 @Data
 @Component

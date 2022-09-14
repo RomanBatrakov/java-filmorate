@@ -1,7 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
@@ -11,7 +12,7 @@ import ru.yandex.practicum.filmorate.dao.GenreDao;
 import java.util.List;
 
 @Slf4j
-@Data
+@AllArgsConstructor
 @Service
 public class GenreService {
 
@@ -29,9 +30,9 @@ public class GenreService {
     public Genre getGenreById(int id) {
         try {
             return genreDAO.getGenreById(id);
-        } catch (NotFoundException e) {
+        } catch (EmptyResultDataAccessException e) {
             log.warn("Ошибка запроса жанра.");
-            throw new ValidationException("Ошибка запроса жанра, проверьте корректность данных.");
+            throw new NotFoundException("Ошибка запроса жанра, проверьте корректность данных.");
         }
     }
 }

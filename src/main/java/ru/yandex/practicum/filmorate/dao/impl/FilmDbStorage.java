@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -15,18 +15,21 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import javax.validation.ValidationException;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
-@Data
+@AllArgsConstructor
 @Component
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+
     private UserService userService;
 
     @Override
@@ -37,12 +40,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(int id) {
-        try {
-            String sqlQuery = "SELECT * FROM films WHERE film_id = ?";
-            return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Ошибка запроса фильма, проверьте корректность данных.");
-        }
+        String sqlQuery = "SELECT * FROM films WHERE film_id = ?";
+        return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
     }
 
     @Override
@@ -59,10 +58,12 @@ public class FilmDbStorage implements FilmStorage {
             stmt.setInt(5, film.getMpa().getId());
             return stmt;
         }, keyHolder);
-        film.setId((Integer) keyHolder.getKey());
-        String genreSqlQuery = "INSERT INTO film_genres (film_id, id) VALUES (?, ?)";
-        film.getGenres().forEach(x -> jdbcTemplate.update(genreSqlQuery, film.getId(), x.getId()));
-        return film;
+        if (keyHolder.getKey() != null) {
+            film.setId((Integer) keyHolder.getKey());
+        } else {
+            throw new ValidationException("Ошибка генерации id в базе.");
+        }
+        return addGenreToFilm(film);
     }
 
     @Override
@@ -70,12 +71,10 @@ public class FilmDbStorage implements FilmStorage {
         String sqlDeleteFilmGenre = "DELETE FROM film_genres WHERE film_id = ?";
         String sqlQuery = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, " +
                 "rating_id = ? WHERE film_id = ?";
-        String genreSqlQuery = "INSERT INTO film_genres (film_id, id) VALUES (?, ?)";
         jdbcTemplate.update(sqlDeleteFilmGenre, film.getId());
         jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(),
                 Date.valueOf(film.getReleaseDate()), film.getDuration(), film.getMpa().getId(), film.getId());
-        film.getGenres().forEach(x -> jdbcTemplate.update(genreSqlQuery, film.getId(), x.getId()));
-        return film;
+        return addGenreToFilm(film);
     }
 
     @Override
@@ -129,5 +128,16 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "SELECT f.id, name FROM film_genres f" +
                 " LEFT JOIN (SELECT * FROM genres) g ON f.id = g.id WHERE film_id = ?";
         return jdbcTemplate.query(sqlQuery, new BeanPropertyRowMapper<>(Genre.class), id);
+    }
+
+    private Film addGenreToFilm(Film film) {
+        String genreSqlQuery = "INSERT INTO film_genres (film_id, id) VALUES (?, ?)";
+        List<Genre> uniqueGenre = film.getGenres()
+                .stream()
+                .distinct()
+                .collect(Collectors.toList());
+        uniqueGenre.forEach(x -> jdbcTemplate.update(genreSqlQuery, film.getId(), x.getId()));
+        film.setGenres(uniqueGenre);
+        return film;
     }
 }

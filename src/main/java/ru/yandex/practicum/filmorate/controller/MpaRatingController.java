@@ -26,5 +26,4 @@ public class MpaRatingController {
     public MpaRating getGenreById(@PathVariable int id) {
         return mpaRatingService.getMpaRatingById(id);
     }
-
 }

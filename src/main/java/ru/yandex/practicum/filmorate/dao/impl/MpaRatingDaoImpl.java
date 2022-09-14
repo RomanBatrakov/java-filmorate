@@ -9,11 +9,14 @@ import ru.yandex.practicum.filmorate.dao.MpaRatingDao;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.util.List;
+
 @Slf4j
 @Data
 @Component
 public class MpaRatingDaoImpl implements MpaRatingDao {
+
     private final JdbcTemplate jdbcTemplate;
+
     @Override
     public List<MpaRating> getMpaRatings() {
         String sqlQuery = "SELECT * FROM rating";
