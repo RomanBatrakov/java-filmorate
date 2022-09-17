@@ -1,2 +1,7 @@
-package ru.yandex.practicum.filmorate.dao.impl;public interface LikeDao {
+package ru.yandex.practicum.filmorate.dao;
+
+public interface LikeDao {
+    void addLikeToFilm(int id, int userId);
+
+    void deleteLikeFromFilm(int id, int userId);
 }

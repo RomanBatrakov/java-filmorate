@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.Value;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,12 +10,12 @@ import ru.yandex.practicum.filmorate.service.MpaRatingService;
 
 import java.util.List;
 
-@Value
+@AllArgsConstructor
 @RestController
 @RequestMapping("/mpa")
 public class MpaRatingController {
 
-    MpaRatingService mpaRatingService;
+    private MpaRatingService mpaRatingService;
 
     @GetMapping
     public List<MpaRating> getGenres() {

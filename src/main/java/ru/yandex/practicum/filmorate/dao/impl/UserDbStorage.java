@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.dao.FriendDao;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -18,8 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-@Slf4j
-@Data
+@AllArgsConstructor
 @Component
 public class UserDbStorage implements UserStorage {
 
@@ -28,8 +27,7 @@ public class UserDbStorage implements UserStorage {
     private static final String CREATE_USER = "INSERT INTO users (email, login, name, birthday) " +
             "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_USER = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE user_id = ?";
-    private static final String ADD_FRIEND = "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)";
-    private static final String DELETE_FRIEND = "DELETE FROM friends WHERE user_id = ? AND friend_id = ?";
+
     private static final String GET_USER_FRIENDS = "SELECT * FROM users u JOIN (SELECT friend_id" +
             " FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
     private static final String GET_COMMON_FRIENDLIST = "SELECT * FROM users u" +
@@ -37,6 +35,7 @@ public class UserDbStorage implements UserStorage {
             " JOIN (SELECT friend_id FROM friends WHERE user_id = ?) l ON u.user_id = l.friend_id";
 
     private final JdbcTemplate jdbcTemplate;
+    private final FriendDao friendDao;
 
     @Override
     public List<User> listUsers() {
@@ -76,16 +75,12 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(int id, int friendId) {
-        try {
-            jdbcTemplate.update(ADD_FRIEND, id, friendId);
-        } catch (Exception e) {
-            throw new NotFoundException("Ошибка запроса, проверьте корректность данных.");
-        }
+        friendDao.addFriend(id, friendId);
     }
 
     @Override
     public void deleteFriend(int id, int friendId) {
-        jdbcTemplate.update(DELETE_FRIEND, id, friendId);
+        friendDao.deleteFriend(id, friendId);
     }
 
     @Override

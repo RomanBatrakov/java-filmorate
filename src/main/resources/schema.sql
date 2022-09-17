@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS film_genres (
         REFERENCES films ON DELETE CASCADE,
     id INTEGER NOT NULL
         REFERENCES genres,
-    PRIMARY KEY (id)
+    PRIMARY KEY (film_id, id)
 );
 
 CREATE TABLE IF NOT EXISTS likes (

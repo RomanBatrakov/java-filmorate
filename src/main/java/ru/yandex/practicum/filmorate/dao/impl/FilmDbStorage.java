@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
+import ru.yandex.practicum.filmorate.dao.LikeDao;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Component
 public class FilmDbStorage implements FilmStorage {
-    private static final String GET_ALL_FILMS = "SELECT * FROM films";
+    private static final String GET_ALL_FILMS = "SELECT * FROM films f LEFT JOIN rating r on r.id = f.rating_id";
     private static final String GET_FILM_BY_ID = "SELECT * FROM films WHERE film_id = ?";
     private static final String CREATE_FILM = "INSERT INTO films " +
             "(name, description, release_date, duration, rating_id) " +
@@ -36,10 +37,7 @@ public class FilmDbStorage implements FilmStorage {
     private static final String UPDATE_FILM = "UPDATE films " +
             "SET name = ?, description = ?, release_date = ?, duration = ?, rating_id = ? " +
             "WHERE film_id = ?";
-    private static final String ADD_LIKE = "INSERT INTO likes (film_id, user_id) VALUES (?, ?)";
-    private static final String DELETE_LIKE = "DELETE FROM likes WHERE film_id = ? AND user_id = ?";
     private static final String GET_MPA = "SELECT * FROM rating WHERE id = ?";
-
     private static final String GET_MOST_POPULAR_FILMS = "SELECT * FROM films f " +
             "LEFT JOIN (SELECT film_id, COUNT(*) likes_count" +
             " FROM likes GROUP BY film_id) l ON f.film_id = l.film_id " +
@@ -51,7 +49,8 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private UserService userService;
+    private final UserService userService;
+    private final LikeDao likeDao;
 
     @Override
     public List<Film> listFilms() {
@@ -94,7 +93,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void addLike(int id, int userId) {
         if (getFilmById(id).getId() == id && userService.getUserById(userId).getId() == userId) {
-            jdbcTemplate.update(ADD_LIKE, id, userId);
+            likeDao.addLikeToFilm(id, userId);
         } else {
             log.warn("Ошибка при добавлении лайка фильму.");
             throw new NotFoundException("Ошибка добавления лайка, проверьте корректность данных.");
@@ -104,7 +103,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteLike(int id, int userId) {
         if (getFilmById(id).getId() == id && userService.getUserById(userId).getId() == userId) {
-            jdbcTemplate.update(DELETE_LIKE, id, userId);
+            likeDao.deleteLikeFromFilm(id, userId);
         } else {
             log.warn("Ошибка при добавлении лайка фильму.");
             throw new NotFoundException("Ошибка добавления лайка, проверьте корректность данных.");

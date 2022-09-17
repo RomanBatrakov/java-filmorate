@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -10,8 +9,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.List;
 
-@Slf4j
-@Data
+@AllArgsConstructor
 @Component
 public class GenreDaoImpl implements GenreDao {
 

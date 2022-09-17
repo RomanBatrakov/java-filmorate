@@ -6,7 +6,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.MpaRatingDao;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
-import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.util.List;
@@ -15,15 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 @Service
 public class MpaRatingService {
-    MpaRatingDao mpaRatingDao;
+    private final MpaRatingDao mpaRatingDao;
 
     public List<MpaRating> getMpaRatings() {
-        try {
             return mpaRatingDao.getMpaRatings();
-        } catch (NotFoundException e) {
-            log.warn("Ошибка запроса списка рейтингов.");
-            throw new ValidationException("Ошибка запроса списка рейтингов, проверьте корректность данных.");
-        }
     }
 
     public MpaRating getMpaRatingById(int id) {
