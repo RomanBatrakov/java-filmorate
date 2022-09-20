@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Component
 public class FilmDbStorage implements FilmStorage {
-    private static final String GET_ALL_FILMS = "SELECT * FROM films f LEFT JOIN rating r on r.id = f.rating_id";
-    private static final String GET_FILM_BY_ID = "SELECT * FROM films WHERE film_id = ?";
+    private static final String GET_ALL_FILMS = "SELECT * FROM films f LEFT JOIN rating r ON r.id = f.rating_id";
+    private static final String GET_FILM_BY_ID = "SELECT * FROM films f LEFT JOIN rating r ON r.id = f.rating_id WHERE film_id = ?";
     private static final String CREATE_FILM = "INSERT INTO films " +
             "(name, description, release_date, duration, rating_id) " +
             "VALUES (?, ?, ?, ?, ?)";
@@ -37,10 +37,9 @@ public class FilmDbStorage implements FilmStorage {
     private static final String UPDATE_FILM = "UPDATE films " +
             "SET name = ?, description = ?, release_date = ?, duration = ?, rating_id = ? " +
             "WHERE film_id = ?";
-    private static final String GET_MPA = "SELECT * FROM rating WHERE id = ?";
     private static final String GET_MOST_POPULAR_FILMS = "SELECT * FROM films f " +
-            "LEFT JOIN (SELECT film_id, COUNT(*) likes_count" +
-            " FROM likes GROUP BY film_id) l ON f.film_id = l.film_id " +
+            "LEFT JOIN (SELECT film_id, COUNT(*) likes_count FROM likes GROUP BY film_id) l ON f.film_id = l.film_id " +
+            "LEFT JOIN rating r ON r.id = f.rating_id " +
             "ORDER BY l.likes_count DESC LIMIT ?";
     private static final String GET_FILM_GENRES = "SELECT f.id, name FROM film_genres f" +
             " LEFT JOIN (SELECT * FROM genres) g ON f.id = g.id " +
@@ -75,7 +74,7 @@ public class FilmDbStorage implements FilmStorage {
             return stmt;
         }, keyHolder);
         if (keyHolder.getKey() != null) {
-            film.setId((Integer) keyHolder.getKey());
+            film.setFilmId((Integer) keyHolder.getKey());
         } else {
             throw new ValidationException("Ошибка генерации id в базе.");
         }
@@ -84,15 +83,15 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        jdbcTemplate.update(DELETE_FILM_GENRES, film.getId());
+        jdbcTemplate.update(DELETE_FILM_GENRES, film.getFilmId());
         jdbcTemplate.update(UPDATE_FILM, film.getName(), film.getDescription(),
-                Date.valueOf(film.getReleaseDate()), film.getDuration(), film.getMpa().getId(), film.getId());
+                Date.valueOf(film.getReleaseDate()), film.getDuration(), film.getMpa().getId(), film.getFilmId());
         return addGenreToFilm(film);
     }
 
     @Override
     public void addLike(int id, int userId) {
-        if (getFilmById(id).getId() == id && userService.getUserById(userId).getId() == userId) {
+        if (getFilmById(id).getFilmId() == id && userService.getUserById(userId).getId() == userId) {
             likeDao.addLikeToFilm(id, userId);
         } else {
             log.warn("Ошибка при добавлении лайка фильму.");
@@ -102,7 +101,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteLike(int id, int userId) {
-        if (getFilmById(id).getId() == id && userService.getUserById(userId).getId() == userId) {
+        if (getFilmById(id).getFilmId() == id && userService.getUserById(userId).getId() == userId) {
             likeDao.deleteLikeFromFilm(id, userId);
         } else {
             log.warn("Ошибка при добавлении лайка фильму.");
@@ -117,16 +116,17 @@ public class FilmDbStorage implements FilmStorage {
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) {
         try {
+            MpaRating mpa = new MpaRating();
             Film film = new Film();
-            film.setId(resultSet.getInt("film_id"));
+            film.setFilmId(resultSet.getInt("film_id"));
             film.setName(resultSet.getString("name"));
             film.setDescription(resultSet.getString("description"));
             film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
             film.setDuration(resultSet.getInt("duration"));
-            int mpaRating = (resultSet.getInt("rating_id"));
-            MpaRating mpa = jdbcTemplate.queryForObject(GET_MPA, new BeanPropertyRowMapper<>(MpaRating.class), mpaRating);
+            mpa.setId(resultSet.getInt("id"));
+            mpa.setTitle(resultSet.getString("title"));
             film.setMpa(mpa);
-            film.setGenres(getFilmGenres(film.getId()));
+            film.setGenres(getFilmGenres(film.getFilmId()));
             return film;
         } catch (EmptyResultDataAccessException | SQLException e) {
             throw new NotFoundException("Ошибка запроса, проверьте корректность данных.");
@@ -142,7 +142,7 @@ public class FilmDbStorage implements FilmStorage {
                 .stream()
                 .distinct()
                 .collect(Collectors.toList());
-        uniqueGenre.forEach(x -> jdbcTemplate.update(ADD_GENRE_TO_FILM, film.getId(), x.getId()));
+        uniqueGenre.forEach(x -> jdbcTemplate.update(ADD_GENRE_TO_FILM, film.getFilmId(), x.getId()));
         film.setGenres(uniqueGenre);
         return film;
     }

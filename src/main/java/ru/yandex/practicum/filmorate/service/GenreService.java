@@ -18,7 +18,7 @@ public class GenreService {
     private final GenreDao genreDAO;
 
     public List<Genre> getGenres() {
-            return genreDAO.getGenres();
+        return genreDAO.getGenres();
     }
 
     public Genre getGenreById(int id) {

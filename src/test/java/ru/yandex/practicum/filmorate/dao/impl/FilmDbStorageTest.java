@@ -35,7 +35,7 @@ class FilmDbStorageTest {
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("id", 1)
+                        assertThat(film).hasFieldOrPropertyWithValue("filmId", 1)
                 );
     }
 
@@ -56,7 +56,7 @@ class FilmDbStorageTest {
     @Test
     void updateFilm() {
         Film film = new Film();
-        film.setId(1);
+        film.setFilmId(1);
         film.setName("filmUpdated");
         film.setDescription("description");
         film.setReleaseDate(LocalDate.ofEpochDay(1985 - 5 - 5));

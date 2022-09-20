@@ -1,4 +1,4 @@
-MERGE INTO rating (id, name)
+MERGE INTO rating (id, title)
     VALUES (1, 'G'),
            (2, 'PG'),
            (3, 'PG-13'),

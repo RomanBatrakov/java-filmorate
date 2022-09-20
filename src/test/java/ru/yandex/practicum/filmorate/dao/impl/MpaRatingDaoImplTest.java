@@ -24,6 +24,6 @@ class MpaRatingDaoImplTest {
 
     @Test
     void getMpaRatingById() {
-        assertEquals("G", mpaRatingDao.getMpaRatingById(1).getName());
+        assertEquals("G", mpaRatingDao.getMpaRatingById(1).getTitle());
     }
 }

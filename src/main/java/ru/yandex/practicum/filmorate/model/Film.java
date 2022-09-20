@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -13,7 +14,8 @@ import java.util.List;
 @Data
 public class Film {
 
-    private int id;
+    @JsonProperty("id")
+    private int filmId;
     @NotBlank
     private String name;
     @Size(max = 200)
@@ -28,5 +30,4 @@ public class Film {
     private MpaRating mpa;
     @NotNull
     private List<Genre> genres = new ArrayList<>();
-
 }

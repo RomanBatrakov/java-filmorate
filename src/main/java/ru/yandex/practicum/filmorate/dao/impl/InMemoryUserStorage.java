@@ -67,6 +67,7 @@ public class InMemoryUserStorage implements UserStorage {
             throw new NotFoundException("Ошибка добавления друга, проверьте корректность данных.");
         }
     }
+
     @Override
     public void deleteFriend(int id, int friendId) {
         if (users.containsKey(id) && users.containsKey(friendId)) {

@@ -17,7 +17,7 @@ public class MpaRatingService {
     private final MpaRatingDao mpaRatingDao;
 
     public List<MpaRating> getMpaRatings() {
-            return mpaRatingDao.getMpaRatings();
+        return mpaRatingDao.getMpaRatings();
     }
 
     public MpaRating getMpaRatingById(int id) {

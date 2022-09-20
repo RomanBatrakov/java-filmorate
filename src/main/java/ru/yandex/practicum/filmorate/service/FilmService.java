@@ -69,7 +69,7 @@ public class FilmService implements FilmStorage {
 
     @Override
     public Film updateFilm(@NonNull Film film) {
-        if (getFilmById(film.getId()).getId() == film.getId() && filmValidation(film)) {
+        if (getFilmById(film.getFilmId()).getFilmId() == film.getFilmId() && filmValidation(film)) {
             filmStorage.updateFilm(film);
             log.debug("Обновлен фильм: {}", film);
             return film;

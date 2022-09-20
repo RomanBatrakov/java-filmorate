@@ -38,15 +38,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film createFilm(@NonNull Film film) {
         addNewId(film);
-        films.put(film.getId(), film);
+        films.put(film.getFilmId(), film);
         log.debug("Сохранен фильм: {}", film);
         return film;
     }
 
     @Override
     public Film updateFilm(@NonNull Film film) {
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
+        if (films.containsKey(film.getFilmId())) {
+            films.put(film.getFilmId(), film);
             return film;
         } else {
             log.warn("Ошибка при обновлении фильма: {}", film);
@@ -106,7 +106,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         while (films.containsKey(id)) {
             id += id;
         }
-        film.setId(id);
+        film.setFilmId(id);
         filmsIdCount = id;
     }
 
