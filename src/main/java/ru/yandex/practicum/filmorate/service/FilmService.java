@@ -1,54 +1,39 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
 
+import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
-@AllArgsConstructor
 @Service
 public class FilmService implements FilmStorage {
+    private final FilmStorage filmStorage;
 
-    private FilmStorage filmStorage;
-    private UserService userService;
-
-    public void addLike(Long id, Long userId) {
-        if (idValidation(id) && userId > 0 && userService.getUsers().containsKey(userId)) {
-            Film film = filmStorage.getFilms().get(id);
-            film.getLikes().add(userId);
-            log.debug("Фильму {} поставили лайк.", film);
-        } else {
-            log.warn("Ошибка при добавлении лайка фильму.");
-            throw new ValidationException("Ошибка добавления лайка, проверьте корректность данных.");
-        }
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
-    public void deleteLike(Long id, Long userId) {
-        if (idValidation(id) && userId > 0) {
-            Film film = filmStorage.getFilms().get(id);
-            film.getLikes().remove(userId);
-            log.debug("Фильму {} удалили лайк.", film);
-        } else {
-            log.warn("Ошибка при удалении лайка фильму.");
-            throw new NotFoundException("Ошибка удаления лайка, проверьте корректность данных.");
-        }
+    public void addLike(int id, int userId) {
+        filmStorage.addLike(id, userId);
+    }
+
+    public void deleteLike(int id, int userId) {
+        filmStorage.deleteLike(id, userId);
     }
 
     public List<Film> getMostPopularFilms(int count) {
         if (count > 0) {
-            return filmStorage.getFilms().values().stream()
-                    .sorted((o1, o2) -> Integer.compare(o2.getLikes().size(), o1.getLikes().size()))
-                    .limit(count)
-                    .collect(Collectors.toList());
+            return filmStorage.getMostPopularFilms(count);
         } else {
             log.warn("Ошибка запроса списка популярных фильмов.");
             throw new ValidationException("Ошибка запроса списка популярных фильмов, проверьте корректность данных.");
@@ -61,31 +46,41 @@ public class FilmService implements FilmStorage {
     }
 
     @Override
-    public Film getFilm(Long id) {
-        if (idValidation(id)) {
-            return filmStorage.getFilm(id);
-        } else {
+    public Film getFilmById(int id) {
+        try {
+            return filmStorage.getFilmById(id);
+        } catch (EmptyResultDataAccessException e) {
             log.warn("Ошибка запроса фильма.");
             throw new NotFoundException("Ошибка запроса фильма, проверьте корректность данных.");
         }
     }
 
     @Override
-    public Film createFilm(Film film) {
-        return filmStorage.createFilm(film);
+    public Film createFilm(@Valid Film film) {
+        if (filmValidation(film)) {
+            filmStorage.createFilm(film);
+            log.debug("Сохранен фильм: {}", film);
+            return film;
+        } else {
+            log.warn("Ошибка при создании фильма: {}", film);
+            throw new ValidationException("Ошибка создания фильма, проверьте корректность данных.");
+        }
     }
 
     @Override
-    public Film updateFilm(Film film) {
-        return filmStorage.updateFilm(film);
+    public Film updateFilm(@NonNull Film film) {
+        if (getFilmById(film.getFilmId()).getFilmId() == film.getFilmId() && filmValidation(film)) {
+            filmStorage.updateFilm(film);
+            log.debug("Обновлен фильм: {}", film);
+            return film;
+        } else {
+            log.warn("Ошибка при обновлении фильма: {}", film);
+            throw new NotFoundException("Ошибка изменения фильма, проверьте корректность данных.");
+        }
     }
 
-    @Override
-    public Map<Long, Film> getFilms() {
-        return filmStorage.getFilms();
-    }
-
-    private boolean idValidation(@NonNull Long id) {
-        return filmStorage.getFilms().containsKey(id);
+    public boolean filmValidation(@NonNull Film film) {
+        LocalDate cinemaBirthday = LocalDate.of(1895, 12, 28);
+        return !film.getReleaseDate().isBefore(cinemaBirthday);
     }
 }

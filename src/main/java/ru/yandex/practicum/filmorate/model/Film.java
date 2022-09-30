@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -7,13 +8,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class Film {
 
-    private long id;
+    @JsonProperty("id")
+    private int filmId;
     @NotBlank
     private String name;
     @Size(max = 200)
@@ -23,5 +25,9 @@ public class Film {
     @Positive
     private int duration;
     @NotNull
-    private Set<Long> likes = new HashSet<>();
+    private int rate;
+    @NotNull
+    private MpaRating mpa;
+    @NotNull
+    private List<Genre> genres = new ArrayList<>();
 }
