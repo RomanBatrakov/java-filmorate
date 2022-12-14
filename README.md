@@ -1,11 +1,15 @@
-# Filmorate project
+## Filmorate project
 Filmorate project - social network with rating of films based on marks from users. Users can add each other to friendlist.
-## Database ER diagram
+### Database ER diagram
 
-## Database ER diagram
-![DB structure.png](https://github.com/RomanBatrakov/java-filmorate/blob/main/ER%20diagram.png)
+### Database 
 <details>
-  <summary><h2>DB request examples:</h2></summary>
+    <summary><h3>ER diagram:</h3></summary>
+![DB structure.png](https://github.com/RomanBatrakov/java-filmorate/blob/main/ER%20diagram.png)
+</details>
+
+<details>
+    <summary><h3>DB request examples:</h3></summary>
 
 - Get all users:
 ```
