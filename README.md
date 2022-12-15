@@ -8,9 +8,22 @@ Filmorate project - social network with rating of films based on marks from user
 - Postman.
 ## Quick start:
 While in the directory on the command line, type:
+
 `mvn package`  
 `cd target`  
 `java -jar filmorate-0.0.1-SNAPSHOT.jar`
+## Rest service:
+<details>
+    <summary><h3>Examples of methods and endpoints available for the API:</h3></summary>
+
+- [(GET) get list of all films](http://localhost:8080/films)
+- [(POST) create new film sending json info](http://localhost:8080/films)
+- [(PUT) update existing film sending json info with specified id](http://localhost:8080/films/{id})
+- [(GET) get film with specified id](http://localhost:8080/films/{id}) 
+- [(GET) get list of all users](http://localhost:8080/users)
+- [(POST) create new user sending json info](http://localhost:8080/users)
+</details>
+
 ## Database description: 
 <details>
     <summary><h3>ER diagram:</h3></summary>
