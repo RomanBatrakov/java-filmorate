@@ -1,7 +1,16 @@
 # Filmorate project
 Filmorate project - social network with rating of films based on marks from users. Users can add each other to friendlist.
-## Database ER diagram
-
+## Tech stack:
+- Java 11;
+- Spring Boot;
+- JDBC, SQL, H2;
+- Maven, , Lombok, Junit;
+- Postman.
+## Quick start:
+While in the directory on the command line, type:
+`mvn package`  
+`cd target`  
+`java -jar filmorate-0.0.1-SNAPSHOT.jar`
 ## Database description: 
 <details>
     <summary><h3>ER diagram:</h3></summary>
