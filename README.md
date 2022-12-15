@@ -4,7 +4,7 @@ Filmorate project - social network with rating of films based on marks from user
 - Java 11;
 - Spring Boot;
 - JDBC, SQL, H2;
-- Maven, , Lombok, Junit;
+- Maven, Lombok, Junit;
 - Postman.
 ## Quick start:
 While in the directory on the command line, type:
